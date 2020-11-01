@@ -9,7 +9,11 @@ import (
 )
 
 var (
-	clrf = []byte("\r\n")
+	clrf    = []byte("\r\n")
+	portMap = map[string]string{
+		"http":  "80",
+		"https": "443",
+	}
 )
 
 type HTTPClient struct {
@@ -27,8 +31,8 @@ type Request struct {
 
 func NewClient() *HTTPClient {
 	return &HTTPClient{
-		Protocol:  "HTTP/1.1",
-		UserAgent: "GoClient",
+		Protocol:  "HTTP/1.0",
+		UserAgent: "Go/1.0",
 	}
 }
 
@@ -87,27 +91,42 @@ func (http HTTPClient) Send(request *Request) ([]byte, error) {
 
 }
 
-func (http HTTPClient) GET(url string) ([]byte, error) {
+func (http HTTPClient) resolveIP(url string) (string, string, string) {
 
 	parsedURL, err := netUrl.Parse(url)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
-	rawPath := parsedURL.RawPath
-	if rawPath == "" {
-		rawPath = "/"
+	port := parsedURL.Port()
+	if port == "" {
+		port = portMap[parsedURL.Scheme]
 	}
+
+	path := parsedURL.RawPath
+	if path == "" {
+		path = "/"
+	}
+
+	return parsedURL.Hostname(), port, path
+
+}
+
+func (http HTTPClient) GET(url string) ([]byte, error) {
+
+	address, port, path := http.resolveIP(url)
+	fmt.Println(net.JoinHostPort(address, port))
 
 	request := Request{
-		Address: parsedURL.Host,
-		Path:    rawPath,
+		Address: net.JoinHostPort(address, port),
+		Path:    path,
 		Method:  "GET",
 		Headers: map[string]string{
 			"User-Agent": http.UserAgent,
 			"Accept":     "*/*",
-			"Host":       parsedURL.Host,
+			"Host":       address,
 		},
+		Body: []byte{},
 	}
 
 	return http.Send(&request)
