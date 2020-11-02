@@ -3,7 +3,7 @@ package HTTP
 import (
 	"bytes"
 	"fmt"
-	"github.com/sh4yy/GoTestHTTP/Utils"
+	"github.com/sh4yy/GoHTTP/Utils"
 	"net"
 	NetURL "net/url"
 	"strconv"
