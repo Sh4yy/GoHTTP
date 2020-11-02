@@ -11,3 +11,5 @@
 `header` http request header in `"Key: Value"` format, can be repeated for multiple headers.\
 `body` http request body.
 
+
+###### Note: This is very shitty code, please don't use in production. (as if anyone would lol)
