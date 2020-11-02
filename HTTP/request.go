@@ -3,6 +3,7 @@ package HTTP
 import (
 	"bytes"
 	"fmt"
+	"github.com/sh4yy/GoTestHTTP/Utils"
 	"net"
 	NetURL "net/url"
 	"strconv"
@@ -38,8 +39,33 @@ func (request *Request) WriteBody(body []byte) {
 	request.WriteHeader("Content-Length", strconv.Itoa(len(body)))
 }
 
+func (request *Request) WriteStringBody(body string) {
+	if body != "" {
+		request.WriteBody([]byte(body))
+	}
+}
+
 func (request *Request) WriteHeader(key, value string) {
 	request.Headers[key] = value
+}
+
+func (request *Request) WriteRawHeader(header string) error {
+	key, value, error := Utils.ParseHeader(header)
+	if error != nil {
+		return error
+	}
+	request.WriteHeader(key, value)
+	return nil
+}
+
+func (request *Request) WriteRawHeaders(headers []string) error {
+	for _, header := range headers {
+		err := request.WriteRawHeader(header)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // urlParser parses url and returns (hostname, port, path, scheme)

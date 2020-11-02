@@ -1,37 +1,39 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
+	"github.com/sh4yy/GoTestHTTP/Utils"
 
 	"github.com/sh4yy/GoTestHTTP/HTTP"
 )
 
-func ParseURLArg() (string, error) {
 
-	var url string
-	flag.StringVar(&url, "url", "", "URL to test against")
-	flag.Parse()
-
-	if url == "" {
-		return "", errors.New("empty url")
-	}
-
-	fmt.Println(url)
-	return url, nil
-
-}
 
 func main() {
 
-	url, err := ParseURLArg()
+	var headers Utils.ListFlags
+	url := flag.String("url", "", "Target URL")
+	method := flag.String("method", "GET", "Request Method")
+	body := flag.String("body", "", "Request Body")
+	flag.Var(&headers, "header", "Request Headers")
+	flag.Parse()
+
+	if *url == "" {
+		panic("missing url")
+	}
+
+	request := HTTP.NewRequest(*url, *method)
+	err := request.WriteRawHeaders(headers)
 	if err != nil {
 		panic(err)
 	}
 
+	request.WriteHeader("Connection", "close")
+	request.WriteStringBody(*body)
+
 	client := HTTP.NewClient()
-	res, err := client.GET(url)
+	res, err := client.Send(request)
 	if err != nil {
 		panic(err)
 	}

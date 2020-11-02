@@ -1,7 +1,6 @@
 package HTTP
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net"
 )
@@ -26,7 +25,6 @@ func (http HTTPClient) Send(request *Request) ([]byte, error) {
 		return nil, err
 	}
 
-	fmt.Println(buf)
 	conn, err := net.Dial("tcp", request.GetAddress())
 	if err != nil {
 		return nil, err
@@ -46,11 +44,41 @@ func (http HTTPClient) Send(request *Request) ([]byte, error) {
 
 }
 
-func (http HTTPClient) GET(url string) ([]byte, error) {
+func (http HTTPClient) GET(url string, headers *Headers) ([]byte, error) {
+
 	request := NewRequest(url, "GET")
 	request.WriteHeader("User-Agent", http.UserAgent)
 	request.WriteHeader("Accept", "*/*")
 	request.WriteHeader("Host", request.GetHostname())
 	request.WriteHeader("Connection", "close")
+
+	if headers != nil {
+		for key, value := range *headers {
+			request.WriteHeader(key, value)
+		}
+	}
+
 	return http.Send(request)
+}
+
+func (http HTTPClient) POST(url string, headers *Headers, body []byte) ([]byte, error) {
+
+	request := NewRequest(url, "POST")
+	request.WriteHeader("User-Agent", http.UserAgent)
+	request.WriteHeader("Accept", "*/*")
+	request.WriteHeader("Host", request.GetHostname())
+	request.WriteHeader("Connection", "close")
+
+	if body != nil {
+		request.WriteBody(body)
+	}
+
+	if headers != nil {
+		for key, value := range *headers {
+			request.WriteHeader(key, value)
+		}
+	}
+
+	return http.Send(request)
+
 }
