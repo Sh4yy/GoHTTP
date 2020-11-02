@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/sh4yy/GoTestHTTP/Utils"
+	"github.com/sh4yy/GoHTTP/Utils"
 
-	"github.com/sh4yy/GoTestHTTP/HTTP"
+	"github.com/sh4yy/GoHTTP/HTTP"
 )
 
 
